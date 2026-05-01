@@ -1,0 +1,179 @@
+            <!-- Main Content -->
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header flex-wrap">
+                        <h1 class="mr-3">Create Client</h1>
+                        <div class="section-header-breadcrumb">
+                            <a href="client" class="btn btn-primary form-btn float-right my-sm-0 my-1">Back</a>
+                        </div>
+                    </div>
+
+                    <div class="section-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-body">
+                                    <form id="agentForm" enctype="multipart/form-data">
+
+                                    <!-- 3 fields in one row -->
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label>Name</label>
+                                            <input type="text" name="name" class="form-control" required placeholder="Enter client name">
+                                        </div>                                       
+                                        
+                                    </div>                                  
+
+                                    <!-- Gender + Profile -->
+                                    <div class="row align-items-center">
+
+                                        <div class="col-md-6 mb-3">
+                                            <label>Profile Image</label>
+                                            <input type="file" name="profile" class="form-control" accept="image/*" onchange="previewImage(this)">
+                                        </div>
+                                         <!-- Image Preview -->
+                                    <div class="col-md-6 mb-3 text-center">
+                                        <img id="imagePreview" class="preview-img" height="100">
+                                    </div>
+                                    </div>
+
+                                    
+                                    <div class="text-end">
+                                        <button type="submit" id="submitBtn" class="btn btn-primary px-4">
+                                            Save Client
+                                        </button>
+
+                                    </div>
+
+                                </form>
+                               
+					            </div>
+                                 <br>
+                                <span style="color:red;">*Note: All fields marked with * are required. | Email can be used to login to the system.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                   
+                </section>
+
+            </div>       
+           <script>
+		/* IMAGE PREVIEW */
+		function previewImage(input) {
+			const preview = document.getElementById('imagePreview');
+			if (input.files && input.files[0]) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					preview.src = e.target.result;
+					preview.style.display = 'block';
+				}
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+
+		/* PASSWORD MATCH VALIDATION */
+// 		const password = document.getElementById('password');
+// 		const confirmPassword = document.getElementById('confirm_password');
+// 		const errorText = document.getElementById('passwordError');
+
+// 		function checkPasswordMatch() {
+// 			if (confirmPassword.value !== password.value) {
+// 				errorText.classList.remove('d-none');
+// 				return false;
+// 			} else {
+// 				errorText.classList.add('d-none');
+// 				return true;
+// 			}
+// 		}
+
+// 		confirmPassword.addEventListener('keyup', checkPasswordMatch);
+// 		password.addEventListener('keyup', checkPasswordMatch);
+
+// 		document.getElementById('agentForm').addEventListener('submit', function(e) {
+// 			if (!checkPasswordMatch()) {
+// 				e.preventDefault();
+// 				confirmPassword.focus();
+// 			}
+		// });
+	</script>
+	<script>
+let aboutEditor; // store editor instance
+
+/* ===============================
+   INITIALIZE CKEDITOR
+================================ */
+ClassicEditor
+    .create(document.querySelector('#about'))
+    .then(editor => {
+        aboutEditor = editor;
+    })
+    .catch(error => {
+        console.error("Editor Error:", error);
+    });
+
+
+/* ===============================
+   FORM SUBMIT
+================================ */
+document.getElementById('agentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (typeof checkPasswordMatch === "function") {
+        if (!checkPasswordMatch()) return;
+    }
+
+    const form = this;
+    const submitBtn = document.getElementById('submitBtn');
+
+    // IMPORTANT: Sync CKEditor data to textarea
+    if (aboutEditor) {
+        document.querySelector('#about').value = aboutEditor.getData();
+    }
+
+    const formData = new FormData(form);
+
+    submitBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm"></span>
+        Saving...
+    `;
+    submitBtn.disabled = true;
+
+    fetch('apps/model/add_client_ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error("HTTP error " + response.status);
+        }
+
+        return response.json();
+    })
+    .then(data => {
+
+        submitBtn.innerHTML = 'Save Agent';
+        submitBtn.disabled = false;
+
+        if (data.status === 'success') {
+
+            alert('Client added successfully!');
+            window.location.href = 'client.php';
+
+        } else {
+
+            alert(data.message || 'Server returned an error.');
+        }
+
+    })
+    .catch(error => {
+
+        submitBtn.innerHTML = 'Save Agent';
+        submitBtn.disabled = false;
+
+        console.error("Fetch Error:", error);
+        alert('Something went wrong. Check console.');
+    });
+});
+</script>
+

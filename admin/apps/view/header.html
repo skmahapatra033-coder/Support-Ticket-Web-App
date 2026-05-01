@@ -1,0 +1,529 @@
+<?php 
+
+$userid = $_SESSION['user_id'];
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+    <title> Conduit 1.0 </title>
+    <link rel="shortcut icon" href="https://infysupport.nyc3.cdn.digitaloceanspaces.com/312/32.png" type="image/x-icon">
+
+    <meta name="csrf-token" content="BN7kwXKxuMa5DTE3sZLmDNJFhgogoBvhwP2P3EyO">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+
+    <!-- General CSS Files -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
+    <link href="../assets/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" href="../assets/css/daterangepicker.css">
+    <link href="../assets/css/select2.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Template CSS -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+
+    <link rel="stylesheet" href="../assets/css/iziToast.min.css">
+    <link rel="stylesheet" href="../assets/css/sweetalert.css" type="text/css" />
+    <link rel="stylesheet" href="../assets/css/phone-number-code.css?id=a3c7a5214c1ceeb1b58bf50604bc87b1" type="text/css" />
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/admin_theme.css">
+    <link href="../assets/css/dashboard-widgets.css?id=b9a150ac372e9012ab22a5a4499d1743" rel="stylesheet" type="text/css" />
+
+    <style>
+        /* Agent Card */
+.agent-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.agent-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Header */
+.agent-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.agent-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.agent-info {
+    flex: 1;
+}
+
+.agent-name {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.agent-email {
+    margin: 4px 0 0;
+    color: #8a8a8a;
+    font-size: 14px;
+}
+
+/* Footer */
+.agent-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Ticket badge */
+.ticket-info {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.ticket-count {
+    background: #0ab39c;
+    color: #fff;
+    font-weight: 600;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+/* Toggle alignment fix */
+.custom-switch {
+    padding-left: 0;
+}
+.counter-badge
+{
+    margin: 5px;
+}
+    </style>
+    <style>
+        /* Ticket Card */
+.ticket-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    transition: all .2s ease;
+}
+
+.ticket-card:hover {
+    background: #f9fafb;
+}
+
+/* Body */
+.ticket-body {
+    display: flex;
+    align-items: center;
+}
+
+/* Avatar */
+.ticket-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    margin-right: 14px;
+}
+
+/* Info */
+.ticket-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-user {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.ticket-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    text-decoration: none;
+}
+
+.ticket-title:hover {
+    text-decoration: underline;
+}
+
+/* Meta */
+.ticket-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    gap: 16px;
+}
+
+/* Status */
+.ticket-status {
+    position: absolute;
+    top: 14px;
+    right: 48px;
+}
+
+/* Delete */
+.ticket-delete {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ticket-status {
+        position: static;
+        margin-top: 8px;
+    }
+
+    .ticket-card {
+        padding: 12px;
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <div id="app" class="admin-app">
+
+        <div class="main-wrapper main-wrapper-1">
+            <div class="navbar-bg"></div>
+            <nav class="navbar navbar-expand-lg main-navbar">
+                <form class="form-inline mr-auto m-block-end-unset" action="#">
+                    <ul class="navbar-nav mr-3">
+                        <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                    </ul>
+                </form>
+                <ul class="navbar-nav navbar-right">
+
+                    <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" title="Notifications" class="nav-link notification-toggle nav-link-lg "><i
+                    class="far fa-bell"></i></a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right" id="notification">
+                            <div class="dropdown-header"><span id="header-notification-counter" class="d-none">0</span> Notifications
+                                <div class="float-right">
+                                </div>
+                            </div>
+                            <div class="dropdown-list-content dropdown-list-icons notification-content">
+                                <div class="empty-state" data-height="250" style="height: 400px;">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-question"></i>
+                                    </div>
+                                    <h2>We couldn&#039;t find any notifications</h2>
+                                </div>
+                                <div class="empty-state d-none" data-height="250" style="height: 400px;">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-question"></i>
+                                    </div>
+                                    <h2>We couldn&#039;t find any notifications</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                                <img src="../assets/icons/male.png"
+                     class="rounded-circle mr-1 thumbnail-rounded user-thumbnail " alt="">
+                <div class="d-sm-none d-lg-inline-block">
+                    Hi, Admin</div>
+            </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                             <a class="dropdown-item has-icon changePasswordModal show-overflow-ellipsis"
+                            href="#"
+                            data-id="1"
+                            data-type="customers">
+                                <i class="fa fa-lock"></i> Change Password
+                            </a>
+                            
+                    
+                    <a href="../logout.php" class="dropdown-item has-icon text-danger show-overflow-ellipsis">
+                        <i class="fa fa-sign-out-alt"></i>Logout
+                    </a>
+                           
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="main-sidebar">
+                <aside id="sidebar-wrapper">
+                     <!-- <div class="sidebar-brand h-auto lh-unset mt-4 custom-flex">
+                        <img src="https://infysupport.nyc3.cdn.digitaloceanspaces.com/311/1.png" width="70px" class="navbar-brand-full" alt="" />&nbsp;&nbsp;
+                        <a href="#" class="pl-2 text-wrap text-break w-75">Conduit Support</a>
+                    </div> -->
+                    <div class="sidebar-brand sidebar-brand-sm">
+                        <div class="d-flex justify-content-center align-items-center h-100 w-100">
+                            <a href="#" class="small-sidebar-text">
+                            <img class="navbar-brand-full" src="https://infysupport.nyc3.cdn.digitaloceanspaces.com/311/1.png"
+                                alt="InfySupport"/>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="sidebar-menu mt-3">
+                        <li class="active">
+                            <a class="nav-link" href="dashboard"><i class="fas fa fa-digital-tachograph"></i>
+                             <span>Dashboard</span></a>
+                        </li>
+                         <li class="">
+                            <a class="nav-link" href="tickets"><i class="fas fa-ticket-alt"></i>
+                            <span>Tickets</span></a>
+                        </li>
+                         <li class="">
+                            <a class="nav-link" href="tickets_history"><i class="fas fa-ticket-alt"></i>
+                            <span>Reports</span></a>
+                        </li>
+                        
+                        <li class="">
+                            <a class="nav-link" href="agents"><i class="fas fa-user"></i>
+                                <span>Agents</span></a>
+                        </li>
+
+                        <li class="">
+                            <a class="nav-link" href="customer"><i class="fas fa-user-tag"></i>
+                                <span>Customers</span></a>
+                        </li>
+                          <li class="">
+                            <a class="nav-link" href="client"><i class="fas fa-user-tag"></i>
+                                <span>Client</span></a>
+                        </li>
+
+                        <li class="">
+                            <a class="nav-link" href="categories"><i class="fas fa-th-list"></i>
+                                <span>Categories</span></a>
+                        </li>
+                         <li class="side-menus ">
+                            <a class="nav-link" href="priority">
+                                <i class="fas fa-cog"></i>
+                                <span>Priority</span>
+                            </a>
+                        </li>
+                       
+                       
+                        <!-- <li class="">
+                            <a class="nav-link" href="conversations"><i class="far fa-comments"></i>
+                <span>Conversations</span>
+                <span class="badge badge-pill badge-light conversation-badge" id="sidebar-message-count">0</span>
+            </a>
+                        </li>
+                        <li class="side-menus ">
+                            <a class="nav-link" href="#">
+                <i class="fas fa-question-circle"></i>
+                <span> FAQs</span>
+            </a>
+                        </li> -->
+                        
+                        
+                          
+                    </ul>
+                </aside>
+                <div id="editProfileModal" class="modal fade" role="dialog" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <!-- Modal content-->
+                        <div class="modal-content left-margin">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Edit Profile</h5>
+                                <button type="button" aria-label="Close" class="close" data-dismiss="modal">×</button>
+                            </div>
+                            <form method="POST" action="https://infysupport.infyom.com/admin/dashboard" accept-charset="UTF-8" id="editProfileForm" autocomplete="off" enctype="multipart/form-data"><input name="_token" type="hidden" value="BN7kwXKxuMa5DTE3sZLmDNJFhgogoBvhwP2P3EyO">
+                                <div class="modal-body">
+                                    <input id="editUserId" name="user_id" type="hidden">
+                                    <input type="hidden" name="_token" value="BN7kwXKxuMa5DTE3sZLmDNJFhgogoBvhwP2P3EyO">
+                                    <div class="row">
+                                        <div class="form-group col-sm-6">
+                                            <label for="name">Name:</label><span class="text-danger">*</span>
+                                            <input id="firstName" class="form-control" required name="name" type="text">
+                                        </div>
+                                        <div class="form-group col-sm-6">
+                                            <label for="email">Email:</label><span class="text-danger">*</span>
+                                            <input id="userEmail" class="form-control" required name="email" type="email">
+                                        </div>
+
+                                        <div class="form-group col-sm-6">
+                                            <span id="profilePictureValidationErrorsBox" class="text-danger d-none"></span>
+                                            <div class="row">
+                                                <div class="col-4 col-sm-4 col-xl-3">
+                                                    <label for="profile_picture">Profile:</label>
+                                                    <label class="image__file-upload text-white"> Choose
+                                    <input id="profilePicture" class="d-none" accept=".jpeg,.png,.jpg,.gif" name="image" type="file">
+                                </label>
+                                                </div>
+                                                <div class="col-3 pl-0 mt-1 float-right">
+                                                    <img id='profilePicturePreview' class="thumbnail-preview w-75 user-edit-profile-img" src="https://infysupport.infyom.com/assets/img/infyom-logo.png">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-sm-6">
+                                            <label for="phone">Phone:</label><span class="text-danger">*</span><br>
+                                            <div class="d-flex">
+                                                <div class="region-code">
+                                                    <button type="button" class="btn btn-default mr-0 f16 dropdown-toggle region-code-button" id="dropdownMenuButton" data-toggle="dropdown">
+                                    <span class="flag edit_profile_flag" id="btnFlag"></span>
+                                    <span class="btn-cc editProfileBtnCc">&nbsp;&nbsp;+91&nbsp;&nbsp;</span>
+                                    <span class="caretButton"></span>
+                                </button>
+                                                    <div class="region-code-div" aria-labelledby="dropdownMenuButton">
+                                                        <ul class="f16 dropdown-menu region-code-ul">
+                                                            <div class="region-code-ul-input-div"><input type="text" class="form-control search-country" />
+                                                            </div>
+                                                            <div class="region-code-ul-div"></div>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <input type="tel" class="form-control" name="phone" id="userPhone" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" required/>
+                                                <input type="hidden" name="region_code" class="edit_profile_region_code" id="regionCode" value="91" />
+                                                <input type="hidden" name="region_code_flag" class="edit_profile_region_code_flag" id="regionCodeFlag" value="in" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button type="submit" class="btn btn-primary" id="btnPrEditSave" data-loading-text="&lt;span class=&#039;spinner-border spinner-border-sm&#039;&gt;&lt;/span&gt;Processing...">Save</button>
+                                        <button type="button" class="btn btn-light left-margin" data-dismiss="modal">Cancel
+                    </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+              
+                <div class="modal fade" id="changePasswordModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Change Password</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form id="changePasswordForm">
+
+                        <input type="hidden" name="id" id="uid" value="<?= $userid ?>">
+                        
+
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="password" id="new_password" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirm_password" class="form-control" required>
+                        </div>
+
+                        <div id="cp_message"></div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Update Password
+                        </button>
+
+                        </form>
+                    </div>
+
+                    </div>
+                </div>
+                </div>
+            </div>
+<script>
+$("#changePasswordForm").on("submit", function(e){
+    e.preventDefault();
+
+    $.ajax({
+    url: "apps/model/change_password.php",
+    type: "POST",
+    data: $(this).serialize(),
+    dataType: "json",
+    success: function(response){
+    if(response.status === "success"){
+    alert(response.message);
+    location.reload();
+    } else {
+    $("#passwordValidationErrorBox")
+        .text(response.message)
+        .show();
+    }
+    }
+    });
+});
+
+</script>
+<script>
+$(document).on("click", ".changePasswordModal", function(e) {
+    e.preventDefault();
+
+    let id = $(this).data("id");
+    
+
+    $("#id").val(id);
+    $("#changePasswordModal").modal("show");
+});
+
+
+$("#changePasswordForm").submit(function(e){
+    e.preventDefault();
+
+    let password = $("#new_password").val();
+    let confirm  = $("#confirm_password").val();
+
+    if(password !== confirm){
+        $("#cp_message").html(
+            '<div class="alert alert-danger">Passwords do not match</div>'
+        );
+        return;
+    }
+
+    $.ajax({
+        url: "apps/model/change_password.php",
+        type: "POST",
+        data: $(this).serialize(),
+        dataType: "json",
+        success: function(res){
+
+            if(res.status === "success"){
+                $("#cp_message").html(
+                    '<div class="alert alert-success">'+res.message+'</div>'
+                );
+
+                setTimeout(()=>{
+                    $("#changePasswordModal").modal("hide");
+                    $("#changePasswordForm")[0].reset();
+                },1500);
+            }else{
+                $("#cp_message").html(
+                    '<div class="alert alert-danger">'+res.message+'</div>'
+                );
+            }
+        }
+    });
+
+});
+</script>

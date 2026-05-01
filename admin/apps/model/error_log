@@ -1,0 +1,80 @@
+[20-Feb-2026 18:34:40 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:34:40 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:34:59 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:34:59 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:35:19 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:35:19 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:35:59 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:35:59 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:38:18 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 18:38:18 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 20:57:52 Asia/Kolkata] PHP Warning:  require(/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php): Failed to open stream: No such file or directory in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 20:57:52 Asia/Kolkata] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/../../../vendoremail/autoload.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 8
+[20-Feb-2026 22:24:10 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:24:11 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:24:36 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:24:46 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:25:28 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: MySQL server has gone away in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:172
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(172): mysqli->rollback()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 172
+[20-Feb-2026 22:26:29 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: MySQL server has gone away in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:172
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(172): mysqli->rollback()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 172
+[20-Feb-2026 22:57:46 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:57:47 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: Lock wait timeout exceeded; try restarting transaction in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:100
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(100): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 100
+[20-Feb-2026 22:58:59 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: MySQL server has gone away in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:172
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(172): mysqli->rollback()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 172
+[21-Feb-2026 08:23:33 Asia/Kolkata] PHP Fatal error:  Uncaught mysqli_sql_exception: MySQL server has gone away in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php:172
+Stack trace:
+#0 /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php(172): mysqli->rollback()
+#1 {main}
+  thrown in /home/ccup0rzu5ehb/public_html/ticketnow.conduitindia.com/admin/apps/model/update_ticket_effort.php on line 172

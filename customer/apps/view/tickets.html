@@ -1,0 +1,459 @@
+<?php
+include "../dbcon/config.php";
+
+?>
+<div class="main-content" style="min-height: 491px;">
+<section class="section">
+
+<div class="section-header flex-wrap">
+    <h1 class="mr-3">Tickets</h1>
+    <div class="section-header-breadcrumb">
+        <a href="create_ticket" class="btn btn-primary">
+            Create <i class="fas fa-plus"></i>
+        </a>
+    </div>
+</div>
+
+<div class="section-body">
+<div class="card">
+<div class="card-body">
+
+<!-- SEARCH -->
+<div class="mb-3">
+    <input type="text"
+           id="ticketSearch"
+           class="form-control"
+           placeholder="Search by ticket title, priority, status, ticket no and agent...">
+ 
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div id="ticketContainer"></div>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- PAGINATION -->
+<div class="mt-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div id="rowInfo" class="small text-muted"></div>
+        <ul class="pagination mb-0" id="pagination"></ul>
+    </div>
+</div>
+
+</section>
+</div>
+
+<!-- Assign Agent Modal -->
+<div class="modal fade" id="assignAgentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Assign Agent</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="assignTicketId">
+
+        <div class="form-group">
+          <label>Select Agent</label>
+          <select id="agentDropdown" class="form-control">
+            <option value="">Loading agents...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="saveAgentBtn">Assign</button>
+        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Livewire Component wire-end:PBZDtd1YnJXL56oM0tGb -->                </div>
+            </div>
+        </div>
+    </section>
+        </div>
+     <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const container = document.getElementById("ticketContainer");
+    const pagination = document.getElementById("pagination");
+    const rowInfo = document.getElementById("rowInfo");
+
+    let currentPage = 1;
+    let currentSearch = "";
+    const perPage = 10;
+
+    /* ===============================
+       STATUS COLOR
+    ============================== */
+    function getStatusClass(status) {
+        switch (status) {
+            case "Open": return "btn-success";
+            case "Rejected": return "btn-danger";
+            case "Closed": return "btn-secondary";
+            case "Under Testing": return "btn-warning";
+            case "Testing Passed": return "btn-primary";
+            case "Testing Failed": return "btn-dark";
+            default: return "btn-info";
+        }          
+    }
+    
+
+     function getApproveStatusClass(approvestatus) {
+        switch (approvestatus) {
+            case "In Approval": return "btn-info";
+            case "Approved": return "btn-success";
+            case "Rejected": return "btn-danger";
+            default: return "btn-primary";
+        }
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleString();
+    }
+
+    /* ===============================
+       LOAD TICKETS
+    ============================== */
+    function loadTickets(page = 1) {
+
+        currentPage = page;
+        let effortApproveStatus = '';
+        container.innerHTML = `
+            <div class="text-center py-3">
+                <i class="fa fa-spinner fa-spin"></i> Loading...
+            </div>`;
+
+        fetch(`apps/model/fetch_tickets.php?page=${page}&limit=${perPage}&search=${encodeURIComponent(currentSearch)}`)
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status !== "success") {
+                container.innerHTML = "Failed to load tickets";
+                return;
+            }
+
+            if (!data.tickets.length) {
+                container.innerHTML = "No tickets found";
+                pagination.innerHTML = "";
+                rowInfo.innerHTML = "";
+                return;
+            }
+
+            container.innerHTML = "";
+
+            data.tickets.forEach(ticket => {
+
+                const card = `
+                <div class="ticket-card mb-3" data-id="${ticket.id}">                     
+
+                    <div class="ticket-status">
+                        
+                     ${(ticket.status == 'Under Testing') ? `
+                     
+                    <!-- MAIN STATUS -->
+                    <div class="dropdown mb-1">
+                        <button class="btn ${getStatusClass(ticket.status)} btn-sm dropdown-toggle"
+                                data-toggle="dropdown">
+                            ${ticket.status}
+                        </button>
+                       
+                         <div class="dropdown-menu dropdown-menu-right">
+                            ${["Testing Passed","Testing Failed"]
+                            .map(status => `
+                                <a href="#" class="dropdown-item change-main-status"
+                                data-status="${status}"
+                                data-id="${ticket.id}">
+                                ${status}
+                                </a>
+                            `).join("")}
+                        </div>
+                    </div>
+                     ` : ``}
+                
+                   ${(Number(ticket.estimate_effort) > 0 && ticket.approve_status == 'In Approval') ? `
+                    
+                    
+                    <!-- APPROVE STATUS -->
+                    <div class="dropdown">
+                        <button class="btn ${getApproveStatusClass(ticket.approve_status)} btn-sm dropdown-toggle"
+                                data-toggle="dropdown">
+                            ${ticket.approve_status}
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right">
+                            ${["Approved", "Rejected"]
+                            .map(approve_status => `
+                                <a href="#" class="dropdown-item change-approve-status"
+                                data-approvestatus="${approve_status}"
+                                data-id="${ticket.id}">
+                                ${approve_status}
+                                </a>
+                            `).join("")}
+                        </div>
+                    </div>
+                   ` : ``}
+                                 
+                    
+
+                </div>
+
+                                       
+
+                    <div class="ticket-body d-flex mt-2">
+                        <a href="view_tickets.php?id=${ticket.id}"><img class="ticket-avatar"
+                             src="https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.customer)}&rounded=true">
+                        </a>
+                         <div class="ml-3">
+                            <strong><a style="font-weight:bold; font-size:16px;" href="view_tickets.php?id=${ticket.id}">(${ticket.ticket_no}) ${ticket.ticket_title} </a></strong><br>
+                             Client: ${ticket.client} &nbsp; By: ${ticket.customer} (${ticket.status})<br>
+                            Assigned: ${ticket.agent}<br>
+                             Due Date:  ${ticket.due_date 
+                            ? new Date(ticket.due_date).toLocaleDateString('en-GB') 
+                            : ''}<br>
+                             Estimated Effort: ${ticket.estimate_effort} <br>
+                                Actual Effort: ${ticket.actual_effort} <br>
+                                <div>
+                                    Effort Approve Status: 
+                                    ${
+                                        !ticket.estimate_effort || ticket.estimate_effort === ''
+                                        ? ''
+                                        : `<strong>${ticket.approve_status}</strong>`
+                                    }
+                                </div>
+                                    
+                                     
+                            <div>
+                                Priority: ${ticket.priority} |
+                               Created On: ${formatDate(ticket.created_at)}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+                container.insertAdjacentHTML("beforeend", card);
+            });
+
+            renderPagination(data.total, data.page, data.limit);
+            renderRowInfo(data.total, data.page, data.limit);
+
+        })
+        .catch(() => {
+            container.innerHTML = "Server error";
+        });
+    }
+
+    /* ===============================
+       ROW INFO
+    ============================== */
+    function renderRowInfo(total, page, limit) {
+        const start = (page - 1) * limit + 1;
+        const end = Math.min(page * limit, total);
+        rowInfo.innerHTML = `Showing ${start} - ${end} of ${total}`;
+    }
+
+    /* ===============================
+       PAGINATION
+    ============================== */
+    function renderPagination(total, page, limit) {
+
+        pagination.innerHTML = "";
+        const totalPages = Math.ceil(total / limit);
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+            pagination.innerHTML += `
+                <li class="page-item ${i === page ? 'active' : ''}">
+                    <button class="page-link" data-page="${i}">${i}</button>
+                </li>`;
+        }
+    }
+
+    /* ===============================
+       PAGINATION CLICK
+    ============================== */
+    document.addEventListener("click", function(e) {
+        const btn = e.target.closest(".page-link");
+        if (!btn) return;
+        loadTickets(parseInt(btn.dataset.page));
+    });
+
+    /* ===============================
+       LIVE SEARCH
+    ============================== */
+    let debounce;
+    document.getElementById("ticketSearch").addEventListener("keyup", function () {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            currentSearch = this.value;
+            loadTickets(1);
+        }, 400);
+    });
+
+
+
+/* ===============================
+   MAIN STATUS UPDATE
+============================== */
+document.addEventListener("click", function(e) {
+
+    const item = e.target.closest(".change-main-status");
+    if (!item) return;
+
+    e.preventDefault();
+
+    const id = item.dataset.id;
+    const newStatus = item.dataset.status;
+
+    fetch("apps/model/update_ticket_status.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: "id=" + id + "&status=" + encodeURIComponent(newStatus)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            loadTickets(currentPage);
+        }
+    });
+});
+
+
+/* ===============================
+   APPROVE STATUS UPDATE
+============================== */
+document.addEventListener("click", function(e) {
+
+    const item = e.target.closest(".change-approve-status");
+    if (!item) return;
+
+    e.preventDefault();
+
+    const id = item.dataset.id;
+    const newApproveStatus = item.dataset.approvestatus;
+
+    fetch("apps/model/update_ticket_status.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: "id=" + id + "&approvestatus=" + encodeURIComponent(newApproveStatus)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            loadTickets(currentPage);
+        }
+    });
+});
+
+        loadTickets();
+});
+
+</script>
+      
+<script>
+    document.addEventListener("click", function(e) {
+
+        const deleteBtn = e.target.closest(".delete-ticket");
+        if (!deleteBtn) return;
+
+        e.preventDefault();
+
+        const card = deleteBtn.closest(".ticket-card");
+        const id = card.dataset.id;
+
+        if (!confirm("Delete this ticket?")) return;
+
+        fetch("apps/model/delete_tickets.php", {
+            method: "POST",
+            headers: {"Content-Type":"application/x-www-form-urlencoded"},
+            body: "id=" + id
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                card.remove();
+            }
+        });
+    });
+</script>
+ 
+<script>
+document.addEventListener("click", function(e){
+
+    const btn = e.target.closest(".assign-agent-btn");
+    if (!btn) return;
+
+    const ticketId = btn.dataset.ticketId;
+
+    document.getElementById("assignTicketId").value = ticketId;
+
+    // Load agents
+    fetch("apps/model/fetch_agents.php")
+    .then(res => res.json())
+    .then(data => {
+
+        const dropdown = document.getElementById("agentDropdown");
+        dropdown.innerHTML = "";
+
+        if (data.status === "success") {
+
+            dropdown.innerHTML += `<option value="">Select Agent</option>`;
+
+            data.agents.forEach(agent => {
+                dropdown.innerHTML += `
+                    <option value="${agent.id}">
+                        ${agent.name}
+                    </option>`;
+            });
+
+        } else {
+            dropdown.innerHTML = `<option>No agents found</option>`;
+        }
+
+        $('#assignAgentModal').modal('show');
+    });
+});
+
+</script>
+
+<script>
+document.getElementById("saveAgentBtn").addEventListener("click", function(){
+
+    const ticketId = document.getElementById("assignTicketId").value;
+    const agentId = document.getElementById("agentDropdown").value;
+
+    if (!agentId) {
+        alert("Please select an agent");
+        return;
+    }
+
+    fetch("apps/model/update_ticket_agent.php", {
+        method: "POST",
+        headers: {"Content-Type":"application/x-www-form-urlencoded"},
+        body: "ticket_id=" + ticketId + "&agent_id=" + agentId
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.status === "success") {
+            alert("Agent assigned successfully");
+            $('#assignAgentModal').modal('hide');
+            location.reload(); // or update UI dynamically
+        } else {
+            alert(data.message || "Failed to assign");
+        }
+
+    });
+});
+</script>

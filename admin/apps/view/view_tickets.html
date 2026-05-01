@@ -1,0 +1,516 @@
+<?php
+include "../dbcon/config.php";
+
+$id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if (!$id) {
+    die("Invalid Ticket ID");
+}
+
+$sql = "SELECT 
+    t.id,
+    t.ticket_title,
+    t.ticket_no,
+    t.classification,
+    t.status,
+    t.created_at,
+    t.due_date,
+	t.description,
+    tr.agent_remarks,
+    tr.admin_remarks,
+    tr.my_remarks,
+    c.name AS customer_name,
+    c.email AS customer_email,
+    cl.name AS client_name,
+    a.name AS agent_name,
+    cat.category_name,
+    p.priority_name,
+    t.estimate_effort,
+    t.actual_effort,
+    ta.file_name AS attachments
+FROM tickets t
+LEFT JOIN client cl ON cl.id = t.client_id
+LEFT JOIN customers c ON c.id = t.customer_id
+LEFT JOIN agents a ON a.id = t.agent_id
+LEFT JOIN categories cat ON cat.id = t.category_id
+LEFT JOIN priority p ON p.id = t.priority
+LEFT JOIN ticket_attachments ta ON ta.ticket_id = t.id
+LEFT JOIN ticket_reply tr ON tr.ticketid = t.id
+WHERE t.id = ?
+GROUP BY t.id
+";
+
+$stmt = $con->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows == 0) {
+    die("Ticket not found");
+}
+
+$ticket = $result->fetch_assoc();
+$stmt->close();
+
+//get all remarks for this ticket
+$ticket_id = (int)$ticket['id']; // assuming ticket primary key is id
+
+$query = "SELECT 
+    tr.*,
+    a.name AS agent_name,
+    c.name AS customer_name
+FROM ticket_reply tr
+LEFT JOIN agents a ON a.id = tr.agent_id
+LEFT JOIN customers c ON c.id = tr.customer_id
+WHERE tr.ticketid = ?
+ORDER BY tr.remark_date ASC";
+
+$stmt = $con->prepare($query);
+$stmt->bind_param("i", $ticket_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+?>
+<style>
+.remarks-box {
+      height: 700px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px 25px;
+    background-color: #ffffff;
+    line-height: 1.6;
+}
+</style>
+			<!-- Main Content -->
+           <div class="main-content">
+    <section class="section">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <h4>View Ticket</h4>
+            <a href="javascript:history.back()" class="btn btn-primary">Back</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <div class="row">
+                     <div class="col-md-4 mb-3">
+                           <div class="col-md-12 mb-3">
+                             <label>Ticket No.</label>
+                              <input type="text" class="form-control"
+                               value="<?= htmlspecialchars($ticket['ticket_no']) ?>" readonly>
+                               
+                            </div>
+                         <div class="col-md-12 mb-3">
+                             <label>Ticket Date</label>
+                             <input type="text" class="form-control"
+                                value="<?= !empty($ticket['created_at']) 
+                                        ? date('d-m-Y h:i A', strtotime($ticket['created_at'])) 
+                                        : '' ?>" 
+                                readonly>
+                               
+                            </div>
+                           
+                             <div class="col-md-12 mb-3">
+                            <label>Classification</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['classification']) ?>" readonly>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label>Status</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['status']) ?>" readonly>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                        <label>Ticket Title</label>
+                        <input type="text" class="form-control"
+                               value="<?= htmlspecialchars($ticket['ticket_title']) ?>" readonly>
+                        </div>
+                          <div class="col-md-12 mb-3">
+                        <label>Email</label>
+                        <input type="text" class="form-control"
+                               value="<?= htmlspecialchars($ticket['customer_email']) ?>" readonly>
+                        </div>
+                          <div class="col-md-12 mb-3">
+                        <label>Category</label>
+                        <input type="text" class="form-control"
+                               value="<?= htmlspecialchars($ticket['category_name']) ?>" readonly>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                        <label>Assigned Agent</label>
+                        <input type="text" class="form-control"
+                               value="<?= htmlspecialchars($ticket['agent_name']) ?>" readonly>
+                        </div>
+                          <div class="col-md-12 mb-3">
+                            <label>Client</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['client_name']) ?>" readonly>
+                        </div>
+                          <div class="col-md-12 mb-3">
+                            <label>Customer</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['customer_name']) ?>" readonly>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label>Priority</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['priority_name']) ?>" readonly>
+                        </div>
+
+                         <div class="col-md-12 mb-3">
+                            <label>Estimated Effort</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['estimate_effort']) ?>" readonly>
+                        </div>
+
+                         <div class="col-md-12 mb-3">
+                            <label>Actual Effort</label>
+                            <input type="text" class="form-control"
+                                value="<?= htmlspecialchars($ticket['actual_effort']) ?>" readonly>
+                        </div>
+                         <div class="col-md-12 mb-3">
+                        <label>Due Date</label>
+                         <input type="text" class="form-control"
+                            value="<?= !empty($ticket['due_date']) 
+                                    ? date('d-m-Y h:i A', strtotime($ticket['due_date'])) 
+                                    : '' ?>" 
+                            readonly>
+                        </div>                      
+
+
+                     </div>
+
+                      <div class="col-md-8 mb-3">
+                         <div class="row">
+                                                        
+                            <!-- Attachments -->
+                            <div class="col-md-12 mb-3">
+                                <label>Attachments</label><br>
+                                <?php if (!empty($ticket['attachments'])): ?>
+                                    <a href="../uploads/tickets/<?= htmlspecialchars($ticket['attachments']) ?>"
+                                    target="_blank"
+                                    class="btn btn-info btn-sm">
+                                    View Attachment
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted">No attachment</span>
+                                <?php endif; ?>
+                            </div>
+
+                         </div>
+                           <div class="row">
+                             <div class="col-md-12 mb-3">
+                           <div class="remarks-box">
+
+                                <strong>Customer Issues:</strong><br>
+                                <?= nl2br(htmlspecialchars(strip_tags($ticket['description'] ?? ''))); ?>
+
+                                <br><br>
+
+                                <?php if ($result && mysqli_num_rows($result) > 0): ?>
+
+                                <?php while ($reply = mysqli_fetch_assoc($result)): ?>
+
+                                <?php
+                                $adminRemark   = $reply['admin_remarks'] ?? '';
+                                $agentRemark   = $reply['agent_remarks'] ?? '';
+                                $customerRemark= $reply['my_remarks'] ?? '';
+                                $attachment    = $reply['attachment'] ?? '';
+                                $remarkDate    = $reply['remark_date'] ?? '';
+                                $agentName     = $reply['agent_name'] ?? 'Agent';
+                                $customerName  = $reply['customer_name'] ?? 'Customer';
+                                ?>
+
+                                <!-- ===== ADMIN REMARK ===== -->
+
+                                <?php if (!empty($adminRemark)): ?>
+
+                                <strong>(Admin | <?= htmlspecialchars($remarkDate) ?>) Admin Remarks:</strong><br>
+
+                                <?= nl2br(htmlspecialchars(strip_tags($adminRemark))); ?><br>
+
+                                <?php if (!empty($attachment)): ?>
+
+                                <a href="../uploads/ticket_reply/<?= htmlspecialchars($attachment) ?>" target="_blank">
+                                View Attachment
+                                </a>
+
+                                <?php endif; ?>
+
+                                <br><br>
+
+                                <?php endif; ?>
+
+
+                                <!-- ===== AGENT REMARK ===== -->
+
+                                <?php if (!empty($agentRemark)): ?>
+
+                                <strong>(<?= htmlspecialchars($agentName) ?> | <?= htmlspecialchars($remarkDate) ?>) Agent Remarks:</strong><br>
+
+                                <?= nl2br(htmlspecialchars(strip_tags($agentRemark))); ?><br>
+
+                                <?php if (!empty($attachment)): ?>
+
+                                <a href="../uploads/ticket_reply/<?= htmlspecialchars($attachment) ?>" target="_blank">
+                                View Attachment
+                                </a>
+
+                                <?php endif; ?>
+
+                                <br><br>
+
+                                <?php endif; ?>
+
+
+                                <!-- ===== CUSTOMER REMARK ===== -->
+
+                                <?php if (!empty($customerRemark)): ?>
+
+                                <strong>(<?= htmlspecialchars($customerName) ?> | <?= htmlspecialchars($remarkDate) ?>) Customer Remarks:</strong><br>
+
+                                <?= nl2br(htmlspecialchars(strip_tags($customerRemark))); ?><br>
+
+                                <?php if (!empty($attachment)): ?>
+
+                                <a href="../uploads/ticket_reply/<?= htmlspecialchars($attachment) ?>" target="_blank">
+                                View Attachment
+                                </a>
+
+                                <?php endif; ?>
+
+                                <br><br>
+
+                                <?php endif; ?>
+
+                                <?php endwhile; ?>
+
+                                <?php else: ?>
+
+                                <p class="text-muted">No replies found.</p>
+
+                                <?php endif; ?>
+
+                                </div>
+                            </div>
+
+                         </div>
+
+                         <form id="remarksForm" method="post" enctype="multipart/form-data">
+
+                         <div class="row">
+      
+                           <form id="remarksForm" enctype="multipart/form-data">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label fw-bold">New Remarks</label>
+                                     <!-- Ticket ID -->
+                                <input type="hidden" name="ticketid" id="ticketid" 
+                                    value="<?= htmlspecialchars($ticket['id']); ?>">
+
+                                      <input type="hidden" name="adminid" id="adminid" 
+                                    value="<?= $_SESSION['user_id']; ?>">
+
+                                    <div class="border p-3 rounded bg-light">
+                                        <textarea 
+                                            rows="8" 
+                                            name="agent_remarks"
+                                            id="agent_remarks" 
+                                            class="form-control"
+                                            required> </textarea>
+                                    </div>
+                                </div>
+                                   <div class="col-md-12 mb-3">    
+                                     <label class="form-label fw-bold">Attach File</label>                          
+                                    <input type="file" name="attachment" id="attachment" />
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <button type="submit" 
+                                            class="btn btn-primary"
+                                            id="updateRemarksBtn">
+                                        Update Remarks
+                                    </button>
+                                </div>
+                                </form>
+                                <!-- Response Message -->
+                                 <div id="responseMsg"></div>
+                                <div id="debugBanner" class="alert alert-warning mt-2" style="display:none;"></div>
+
+                           
+                         </div>
+                    </form>
+
+    
+    </div>
+
+</div>               
+ 
+                
+
+              
+
+              
+
+            </div>
+        </div>
+
+    </section>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+$(document).ready(function () {
+
+    let agentEditor;
+
+    /* ===============================
+       CKEDITOR INITIALIZATION
+    =============================== */
+    if (document.querySelector('#agent_remarks')) {
+
+        ClassicEditor
+            .create(document.querySelector('#agent_remarks'))
+            .then(editor => {
+                agentEditor = editor;
+                console.log("CKEditor Loaded");
+            })
+            .catch(error => {
+                console.error("Editor Load Error:", error);
+            });
+
+    }
+
+    /* ===============================
+       FORM SUBMIT
+    =============================== */
+    $('#remarksForm').on('submit', function (e) {
+
+        e.preventDefault();
+
+        let $btn = $('#updateRemarksBtn');
+        let ticketid = $('#ticketid').val();
+        let adminid = $('#adminid').val();
+
+        if (!ticketid) {
+            alert('Invalid Ticket ID');
+            return;
+        }
+
+        if (!agentEditor) {
+            alert('Editor not loaded properly');
+            return;
+        }
+
+        let remarks = agentEditor.getData().trim();
+
+        if (remarks === '') {
+            alert('Please enter remarks');
+            return;
+        }
+
+        let formData = new FormData();
+
+        formData.append("ticketid", ticketid);
+        formData.append("adminid", adminid);
+        formData.append("agent_remarks", remarks);
+
+        /* ===============================
+           FILE ATTACHMENT
+        =============================== */
+
+        let fileInput = $('#attachment')[0];
+
+        if (fileInput.files.length > 0) {
+
+            let file = fileInput.files[0];
+
+            let allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/jpg',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Invalid file type. Only JPG, PNG, PDF, DOC allowed.");
+                return;
+            }
+
+            if (file.size > 100 * 1024 * 1024) {
+                alert("File size must be less than 10MB");
+                return;
+            }
+
+            formData.append("attachment", file);
+        }
+
+        /* ===============================
+           BUTTON LOADING STATE
+        =============================== */
+
+        $btn.prop('disabled', true).text('Saving...');
+
+        /* ===============================
+           AJAX REQUEST
+        =============================== */
+
+        $.ajax({
+
+            url: 'apps/model/update_ticket_reply.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+
+            success: function (response) {
+
+                if (response.status === 'success') {
+
+                    $('#responseMsg').html(
+                        '<div class="alert alert-success">' + response.message + '</div>'
+                    );
+
+                    agentEditor.setData('');
+                    $('#attachment').val('');
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1200);
+
+                } else {
+
+                    $('#responseMsg').html(
+                        '<div class="alert alert-danger">' + response.message + '</div>'
+                    );
+
+                }
+
+            },
+
+            error: function () {
+
+                $('#responseMsg').html(
+                    '<div class="alert alert-danger">Server error occurred</div>'
+                );
+
+            },
+
+            complete: function () {
+
+                $btn.prop('disabled', false).text('Update Remarks');
+
+            }
+
+        });
+
+    });
+
+});
+
+
+</script>

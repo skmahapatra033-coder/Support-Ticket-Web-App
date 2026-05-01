@@ -1,0 +1,151 @@
+<?php
+
+$getusers = mysqli_query($con, "SELECT * FROM customers");
+$user = mysqli_fetch_assoc($getusers);
+
+?>
+<div class="main-content">
+<section class="section">
+<div class="section-header flex-wrap">
+    <h1 class="mr-3">Update Profile</h1>
+    <div class="section-header-breadcrumb">
+        <a href="dashboard" class="btn btn-primary">Back</a>
+    </div>
+</div>
+
+<div class="section-body">
+<div class="card">
+<div class="card-body">
+
+<form id="profileForm" enctype="multipart/form-data">
+
+<input type="hidden" name="id" value="<?= $user['id'] ?>">
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label>Name</label>
+        <input type="text" name="name" class="form-control"
+               value="<?= htmlspecialchars($user['name']) ?>" required>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label>Email *</label>
+        <input type="email" name="email" class="form-control"
+               value="<?= htmlspecialchars($user['email']) ?>" required>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <label>Phone</label>
+        <input type="text" name="phone" class="form-control"
+               value="<?= htmlspecialchars($user['phone']) ?>" required>
+    </div>
+</div>
+
+<!-- Password (Optional for Update) -->
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label>Password</label>
+        <input type="password" id="password" name="password" class="form-control" value="<?= htmlspecialchars($user['password']) ?>">
+    </div>
+     <div class="col-md-4 mb-3">
+        <label>Gender</label>
+        <select name="gender" class="form-control" required>
+            <option value="">-- Select Gender --</option>
+            <option <?= $user['gender']=='Male'?'selected':'' ?>>Male</option>
+            <option <?= $user['gender']=='Female'?'selected':'' ?>>Female</option>
+            <option <?= $user['gender']=='Other'?'selected':'' ?>>Other</option>
+        </select>
+    </div>
+       <div class="col-md-4 mb-3">
+        <label>Profile Image</label>
+        <input type="file" name="profile" class="form-control"
+               accept="image/*" onchange="previewImage(this)">
+    </div>
+    
+</div>
+ 
+
+<div class="mb-3 text-center">
+    <img id="imagePreview"
+         src="<?= !empty($user['profile']) ? $user['profile'] : '' ?>"
+         height="100">
+</div>
+
+<div class="mb-3">
+    <label>About</label>
+    <textarea name="about" id="about" class="form-control" rows="4">
+        <?= htmlspecialchars($user['about']) ?>
+    </textarea>
+</div>
+
+<div class="text-end">
+    <button type="submit" id="submitBtn" class="btn btn-primary px-4">
+        Update Profile
+    </button>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+</section>
+</div>
+<script>
+// IMAGE PREVIEW
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => preview.src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+
+// CKEDITOR
+let aboutEditor;
+ClassicEditor.create(document.querySelector('#about'))
+.then(editor => { aboutEditor = editor; });
+
+// SUBMIT
+document.getElementById('profileForm').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (aboutEditor) {
+        document.querySelector('#about').value = aboutEditor.getData();
+    }
+
+    const formData = new FormData(this);
+
+    submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Updating...`;
+    submitBtn.disabled = true;
+
+    fetch('apps/model/update_profile.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        submitBtn.innerHTML = 'Update Profile';
+        submitBtn.disabled = false;
+
+        if(data.status === 'success'){
+            alert('Profile updated successfully!');
+            location.reload();
+        }else{
+            alert(data.message || 'Update failed');
+        }
+    })
+    .catch(err=>{
+        submitBtn.innerHTML = 'Update Profile';
+        submitBtn.disabled = false;
+        alert('Something went wrong.');
+        console.error(err);
+    });
+});
+</script>

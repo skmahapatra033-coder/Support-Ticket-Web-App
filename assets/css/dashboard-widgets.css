@@ -1,0 +1,62 @@
+.total-agents-bg {
+    background-image: linear-gradient(90deg, #4facfe 0, #00f2fe);
+    background-image: -webkit-linear-gradient(90deg, #4facfe 0, #00f2fe)
+}
+
+.verified-category-bg {
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, rgba(230, 115, 1, .68) 21.4%, #1a994a 80.3%)
+}
+
+.open-ticket-bg {
+    background: #ffe601;
+    
+}
+.close-ticket-bg {
+    background: linear-gradient(90deg, #0ac282, #0df3a3);
+    background-image: -webkit-linear-gradient(90deg, #0ac282, #0df3a3)
+}
+.reject-ticket-bg {
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, #980fd8, #980fd8);
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, #980fd8, #980fd8)
+}
+.under-testing-ticket-bg {
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, #ec6f09, #ec6f09);
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, #ec6f09, #ec6f09)
+}
+.testingpassed-ticket-bg {
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, #00ff37, #00ff37);
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, #00ff37, #00ff37)
+}
+.testingfailed-ticket-bg {
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, #ff0000, #ff0000);
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, #ff0000, #ff0000)
+}
+.inapproval-ticket-bg {
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, #ff9900, #ff9900);
+    background-image: -webkit-radial-gradient(circle farthest-corner at 10% 20%, #ff9900, #ff9900)
+}
+
+.time_range {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    max-height: 42px;
+    padding: 6px 10px
+}
+
+@media screen and (max-width:576px) {
+    .selectgroup-button {
+        font-size: 11px
+    }
+}
+
+.custom-dash-header {
+    padding: 15px 8px !important
+}
+
+.custom-seclect-pills {
+    align-items: flex-start !important;
+    flex-wrap: nowrap;
+    white-space: nowrap !important
+}

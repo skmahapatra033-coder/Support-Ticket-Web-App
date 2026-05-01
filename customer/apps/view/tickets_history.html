@@ -1,0 +1,373 @@
+<?php
+try {
+    $stmt = $pdo->prepare("SELECT id, name FROM customers ORDER BY name ASC");
+    $stmt->execute();
+    $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching customers: " . $e->getMessage());
+}
+
+try {
+    $stmt = $pdo->prepare("SELECT id, name FROM agents ORDER BY name ASC");
+    $stmt->execute();
+    $agents = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching agents: " . $e->getMessage());
+}
+
+/* Fetch Clients */
+$clients = mysqli_query(
+    $con,
+    "SELECT id, name FROM client WHERE status = 1 ORDER BY name ASC"
+);
+?>
+           
+           <style>
+                .card .card-header .form-control
+                {
+                    border-radius: -1px !important;
+                    font-size: 13px !important;
+                    
+                }
+                .badge-warning{
+                    background-color: #ffe601 !important;
+                    color:black !important;
+                }
+                .badge-success
+                {
+                     background-color: #0df3a3 !important;
+                    color:black !important;
+                }
+                .badge-info
+                {
+                     background-color: #980fd8 !important;
+                    color:rgb(255, 255, 255) !important;
+                }
+                 .badge-primary
+                {
+                     background-color: #ec6f09 !important;
+                    color:rgb(255, 255, 255) !important;
+                }
+
+                .badge-dark
+                {
+                     background-color: #00ff37 !important;
+                    color:rgb(0, 0, 0) !important;
+                }
+                .badge-danger
+                {
+                     background-color: #ff0000 !important;
+                     color:rgb(255, 255, 255) !important;
+                }
+                .badge-secondary
+                {
+                     background-color: #ff9900 !important;
+                     color:rgb(0, 0, 0) !important;
+                }
+                
+            </style>
+            <!-- Main Content -->
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header d-flex justify-content-between align-items-center">    
+                        <h1 class="mb-0">Ticket History</h1>
+                      </div>
+                    <!-- statistics count starts -->
+                   
+                    <!-- statistics count ends -->
+
+                    <!-- Chart Data starts -->
+                      <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <div class="card">
+                                <div class="table-responsive">
+                                <div class="card-header justify-content-between flex-md-row flex-column flex-wrap card-header-right">
+                                   
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                           <select id="filterstatus" multiple>
+                                                <option value="Open" selected>Open</option>
+                                                <option value="Under Testing" selected>Under Testing</option>
+                                                <option value="Closed">Closed</option>
+                                                <option value="Rejected">Rejected</option>
+                                                <option value="Testing Passed" selected>Testing Passed</option>
+                                                <option value="Testing Failed" selected>Testing Failed</option>
+                                            </select>
+                                     </div>
+                                    
+                                    <div class="col-sm-6">
+                                        <select id="filterinapprove" class="form-control">
+                                            <option value="">-Approve Status-</option>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+                               
+                               
+                                
+                            </div>
+                             <div class="row">
+                                     <div class="card-body" id="agentWiseTicket">
+                                     
+                                    </div>
+                                </div>
+                            <div id="agentWiseTicket"></div>
+                            <div id="ticketPagination" class="mt-3 text-center"></div>
+                        </div>
+                        </div>
+
+                      
+                    </div>
+                    <!-- Chart Data ends -->
+                </section>
+            </div>
+          
+<script>
+$(document).ready(function(){
+
+    function loadTickets() {
+
+        $.ajax({
+            url: "apps/model/get_tickets.php",
+            type: "GET",
+            dataType: "json",
+            success: function(response){
+
+                if(response.status === "success"){
+
+                    let rows = "";
+
+                    response.data.forEach(function(ticket){
+
+                        rows += `<tr>
+                                <td>${ticket.id}</td>
+                                <td>${ticket.due_date}</td>
+                                <td>${ticket.ticket_title}</td>
+                                <td>${ticket.email}</td>
+                                <td>${ticket.priority}</td>
+                                <td>${ticket.status}</td>
+                                <td>
+                                    <button onclick="viewTicket(${ticket.id})">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    $("#ticketTableBody").html(rows);
+                }
+            },
+            error: function(xhr){
+                console.log(xhr.responseText);
+            }
+        });
+
+    }
+
+   
+
+});
+ loadTickets();
+
+// Redirect function
+function viewTicket(id){
+    window.location.href = "view_tickets.php?id=" + id;
+}
+
+
+
+</script>
+<script>
+ 
+let currentPage = 1;
+let limit = 10;
+
+function loadTickets(page = 1) {
+
+    currentPage = page;
+
+    const statusSelect  = document.getElementById("filterstatus");
+    const approveStatus = document.getElementById("filterinapprove")?.value || "";
+
+    let selectedStatuses = statusSelect
+        ? Array.from(statusSelect.selectedOptions).map(opt => opt.value)
+        : [];
+
+    if (selectedStatuses.length === 0) {
+        selectedStatuses = ["Open", "Under Testing"];
+    }
+
+    const params = new URLSearchParams();
+    params.append("page", page);
+    params.append("limit", limit);
+    params.append("approve_status", approveStatus);
+
+    selectedStatuses.forEach(status => {
+        params.append("status[]", status);
+    });
+
+    fetch(`apps/model/fetch_tickets_history.php?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+
+            if (!data || data.status !== "success") {
+                document.getElementById("agentWiseTicket").innerHTML =
+                    `<div class="alert alert-danger">Failed to load tickets</div>`;
+                return;
+            }
+
+            renderTickets(data.tickets || []);
+            renderPagination(data.page, data.pages);
+
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("agentWiseTicket").innerHTML =
+                `<div class="alert alert-danger">Error loading tickets</div>`;
+        });
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
+function renderTickets(tickets) {
+
+    let html = `
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped table-sm mb-0">
+            <thead class="thead-dark text-center">
+                <tr>
+                    <th>Ticket No</th>
+                    <th>Created On</th>
+                    <th>Due Date</th>
+                     <th>Client</th>
+                    <th>Customer</th>
+                    <th>Ticket Title</th>
+                    <th>Status</th>
+                    <th>Approve Status</th>
+                    <th>Priority</th>
+                    <th>Agent</th>
+                    <th>Est. Effort</th>
+                    <th>Actual Effort</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    if (tickets.length === 0) {
+        html += `
+            <tr>
+                <td colspan="11" class="text-center py-4 text-muted">
+                    No Tickets Found
+                </td>
+            </tr>`;
+    } else {
+
+        tickets.forEach(ticket => {
+
+            let statusBadge = `<span class="badge badge-warning">${ticket.status}</span>`;
+
+            if (ticket.status === "Closed")
+                statusBadge = `<span class="badge badge-success">${ticket.status}</span>`;
+            else if (ticket.status === "Rejected")
+                statusBadge = `<span class="badge badge-info">${ticket.status}</span>`;
+            else if (ticket.status === "Under Testing")
+                statusBadge = `<span class="badge badge-primary">${ticket.status}</span>`;
+            else if (ticket.status === "Testing Failed")
+                statusBadge = `<span class="badge badge-danger">${ticket.status}</span>`;
+
+            let approveBadge = "-";
+            if (ticket.estimate_effort > 0) {
+                if (ticket.approve_status === "Approved")
+                    approveBadge = `<span class="badge badge-success">Approved</span>`;
+                else if (ticket.approve_status === "Rejected")
+                    approveBadge = `<span class="badge badge-danger">Rejected</span>`;
+                else
+                    approveBadge = `<span class="badge badge-secondary">In Approval</span>`;
+            }
+
+            html += `
+                <tr>
+                    <td>${ticket.ticket_no || ''}</td>
+                    <td>${formatDate(ticket.created_at)}</td>
+                    <td>${formatDate(ticket.due_date)}</td>
+                    <td>${ticket.client || ''}</td>
+                    <td>${ticket.customer || ''}</td>
+                    <td>${ticket.ticket_title || ''}</td>
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="text-center">${approveBadge}</td>
+                    <td>${ticket.priority || ''}</td>
+                    <td>${ticket.agent || ''}</td>
+                    <td class="text-center">${ticket.estimate_effort || '-'}</td>
+                    <td class="text-center">${ticket.actual_effort || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    html += `</tbody></table></div>`;
+
+    document.getElementById("agentWiseTicket").innerHTML = html;
+}
+
+function renderPagination(currentPage, totalPages) {
+
+    const container = document.getElementById("ticketPagination");
+
+    if (totalPages <= 1) {
+        container.innerHTML = "";
+        return;
+    }
+
+    let html = `<ul class="pagination justify-content-center">`;
+
+    html += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="event.preventDefault(); loadTickets(${currentPage - 1})">Previous</a>
+        </li>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+
+        if (
+            i === 1 ||
+            i === totalPages ||
+            (i >= currentPage - 2 && i <= currentPage + 2)
+        ) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadTickets(${i})">${i}</a>
+                </li>
+            `;
+        }
+    }
+
+    html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="event.preventDefault(); loadTickets(${currentPage + 1})">Next</a>
+        </li>
+    `;
+
+    html += `</ul>`;
+
+    container.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    loadTickets();
+
+    document.getElementById("filterstatus")?.addEventListener("change", () => loadTickets(1));
+    document.getElementById("filterinapprove")?.addEventListener("change", () => loadTickets(1));
+
+});
+</script>
+ 

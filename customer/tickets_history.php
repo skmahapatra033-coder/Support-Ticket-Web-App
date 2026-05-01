@@ -1,0 +1,9 @@
+<?php
+ob_start();
+include("../session.php");
+include("../dbcon/pdocon.php");
+include("../dbcon/config.php");
+include("apps/view/header.html");
+include("apps/view/tickets_history.html");
+include("apps/view/footer.html");
+?>

@@ -1,0 +1,550 @@
+<?php
+include "../dbcon/config.php";
+
+$query = "SELECT a.id, a.name, a.email, a.profile,
+       COUNT(t.id) AS ticket_count
+FROM agents a
+LEFT JOIN tickets t ON t.agent_id = a.id
+GROUP BY a.id
+ORDER BY a.id DESC";
+$result = mysqli_query($con, $query);
+
+
+/* ===============================
+   PAGINATION + SEARCH SETUP
+================================= */
+
+$limit  = 6; // agents per page
+$page   = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+$search = trim($_GET['search'] ?? '');
+$searchParam = "%{$search}%";
+
+/* ===============================
+   TOTAL COUNT QUERY
+================================= */
+
+$countSql = "SELECT COUNT(*) as total 
+             FROM agents 
+             WHERE name LIKE ? OR email LIKE ?";
+
+$stmtCount = $con->prepare($countSql);
+$stmtCount->bind_param("ss", $searchParam, $searchParam);
+$stmtCount->execute();
+$countResult = $stmtCount->get_result()->fetch_assoc();
+
+$totalRecords = $countResult['total'];
+$totalPages   = ceil($totalRecords / $limit);
+
+/* ===============================
+   FETCH AGENTS QUERY
+================================= */
+
+$sql = "SELECT 
+        a.id, 
+        a.name, 
+        a.email, 
+        a.profile,
+        
+        COUNT(t.id) AS totalTickets,
+
+        SUM(CASE WHEN t.status = 'Open' THEN 1 ELSE 0 END)        AS openTickets,
+        SUM(CASE WHEN t.status = 'Closed' THEN 1 ELSE 0 END)      AS closedTickets,
+        SUM(CASE WHEN t.status = 'Rejected' THEN 1 ELSE 0 END)    AS rejectedTickets,
+        SUM(CASE WHEN t.status = 'Under Testing' THEN 1 ELSE 0 END) AS progressTickets,
+        SUM(CASE WHEN t.status = 'Testing Passed' THEN 1 ELSE 0 END)      AS passedTesting,
+        SUM(CASE WHEN t.status = 'Testing Failed' THEN 1 ELSE 0 END)      AS failedTesting
+
+        FROM agents a
+        LEFT JOIN tickets t ON t.agent_id = a.id
+        WHERE a.name LIKE ? OR a.email LIKE ?
+        GROUP BY a.id
+        ORDER BY a.id DESC
+        LIMIT ?, ?";
+
+$stmt = $con->prepare($sql);
+$stmt->bind_param("ssii", $searchParam, $searchParam, $offset, $limit);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$start = $offset + 1;
+$end   = min($offset + $limit, $totalRecords);
+
+?>
+<style>
+     .badge-warning{
+                    background-color: #ffe601 !important;
+                    color:black !important;
+                }
+                .badge-success
+                {
+                     background-color: #0df3a3 !important;
+                    color:black !important;
+                }
+                .badge-info
+                {
+                     background-color: #980fd8 !important;
+                    color:rgb(255, 255, 255) !important;
+                }
+                 .badge-primary
+                {
+                     background-color: #ec6f09 !important;
+                    color:rgb(255, 255, 255) !important;
+                }
+
+                .badge-dark
+                {
+                     background-color: #00ff37 !important;
+                    color:rgb(0, 0, 0) !important;
+                }
+                .badge-danger
+                {
+                     background-color: #ff0000 !important;
+                     color:rgb(255, 255, 255) !important;
+                }
+                .badge-secondary
+                {
+                     background-color: #ff9900 !important;
+                     color:rgb(0, 0, 0) !important;
+                }
+                .badge-light, .text-light
+                {
+                     background-color: #00b0b0 !important;
+                     color:rgb(255, 255, 255) !important;
+                }
+
+                .text-light
+                {
+                     color:#00b0b0!important;
+                }
+                .text-warning{
+                     
+                    color:#ffe601 !important;
+                }
+                .text-success{
+                     
+                    color:#0df3a3 !important;
+                }
+                 .text-info{
+                     
+                    color:#980fd8 !important;
+                }
+                .text-primary{
+                     
+                    color:#ec6f09 !important;
+                } 
+                .text-dark{
+                     
+                    color:#00ff37 !important;
+                }
+                 .text-danger{
+                     
+                    color:#ff0000 !important;
+                }
+</style>
+            <!-- Main Content -->
+            <div class="main-content">
+                <section class="section">
+                    <div class="section-header flex-wrap">
+                        <h1 class="mr-3">Agents</h1>
+                        <div class="section-header-breadcrumb my-sm-0 my-1">
+                            <a href="create_agents" class="btn btn-primary form-btn">Add
+                    <i class="fas fa-plus"></i></a>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="card">
+                           <div class="card-body">
+                            <div wire:id="ciTyTe7OdrqqV1LjBQx2">
+                                <div class="d-flex mb-3 justify-content-between flex-wrap custom-customer-input">
+                                    <div class="mb-2 mr-3 d-flex flex-wrap">
+                                        <div>
+                                            <i class="fas fa-circle text-light mx-2"></i><span>Total Tickets</span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-circle text-warning mx-2"></i><span>Open Tickets</span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-circle text-primary mx-2"></i><span>Under Testing Tickets</span>
+                                        </div>
+                                         <div>
+                                            <i class="fas fa-circle text-danger mx-2"></i><span>Testing Failed</span>
+                                        </div>
+
+                                        <div>
+                                            <i class="fas fa-circle text-dark mx-2"></i><span>Testing Passed</span>
+                                        </div>
+
+                                        <div>
+                                            <i class="fas fa-circle text-success mx-2"></i><span>Closed Tickets</span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-circle text-info mx-2"></i><span>Rejected Tickets</span>
+                                        </div>
+                                      
+                                       
+                                       
+                                    </div>
+                                     <div class="d-flex mb-3 justify-content-end flex-wrap justify-content-mobile-center">
+                                        <div class="width-mobile-100">
+                                            <div class="selectgroup">
+                                            <input type="search"
+                                                    name="search"
+                                                    id="searchByUser"
+                                                    value="<?php echo htmlspecialchars($search); ?>"
+                                                    placeholder="Search Agent"
+                                                    class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                      
+                       
+                            <div class="users-card">
+                                <div class="row"  id="agentResults">
+
+                                    <?php if ($result && mysqli_num_rows($result) > 0): ?>
+                                        
+                                        <?php while ($agent = mysqli_fetch_assoc($result)): ?>
+
+                                            <?php
+                                                $profileImg = !empty($agent['profile'])
+                                                    ? "../uploads/agents/" . $agent['profile']
+                                                    : "../uploads/agents/male.png";
+                                            ?>
+
+                                            <div class="col-xl-4 col-md-6 mb-4">
+                                                <div class="agent-card">
+                                                    <div class="agent-header">
+                                                        <img src="<?php echo $profileImg; ?>" class="agent-avatar">
+                                                        <div class="agent-info">
+                                                            <h5 class="agent-name"><?php echo htmlspecialchars($agent['name']); ?></h5>
+                                                            <p class="agent-email"><?php echo htmlspecialchars($agent['email']); ?></p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex assigned-user justify-content-between pt-0">
+                                                    <div class="d-flex">
+                                                        <div class="counter-badge">
+                                                            <div class="text-center badge badge-light font-weight-bold">
+                                                                <?php echo $agent['totalTickets']; ?>
+                                                            </div>
+                                                    </div>
+
+                                                    <div class="counter-badge">
+                                                        <div class="text-center badge badge-warning font-weight-bold">
+                                                            <?php echo $agent['openTickets']; ?>
+                                                        </div>
+                                                    </div>
+                                                      <div class="counter-badge">
+                                                        <div class="text-center badge badge-primary font-weight-bold">
+                                                            <?php echo $agent['progressTickets']; ?>
+                                                        </div>
+                                                    </div>
+
+                                                     <div class="counter-badge">
+                                                        <div class="text-center badge badge-danger font-weight-bold">
+                                                                <?php echo $agent['failedTesting']; ?>
+                                                            </div>
+                                                    </div>
+                                                     <div class="counter-badge">
+                                                        <div class="text-center badge badge-dark font-weight-bold">
+                                                            <?php echo $agent['passedTesting']; ?>
+                                                        </div>
+                                                    </div>
+                                                     
+                                                        <div class="counter-badge">
+                                                        <div class="text-center badge badge-success font-weight-bold text-white bg-danger">
+                                                            <?php echo $agent['closedTickets']; ?>
+                                                        </div>
+                                                    </div>
+
+                                                        <div class="counter-badge">
+                                                        <div class="text-center badge badge-info font-weight-bold">
+                                                            <?php echo $agent['rejectedTickets']; ?>
+                                                        </div>
+                                                    </div>
+ 
+
+                                                    </div>
+                                                    <label class="custom-switch">
+                                                        <button 
+                                                            class="btn btn-sm btn-primary mr-2 view-agent-btn"
+                                                            data-id="<?php echo $agent['id']; ?>">
+                                                            View
+                                                        </button>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <?php endwhile; ?>
+
+                                    <?php else: ?>
+
+                                        <div class="col-12 text-center">
+                                            <p>No agents found.</p>
+                                        </div>
+
+                                    <?php endif; ?>
+
+                                </div>
+                            </div>
+
+
+                        <div class="mt-0 mb-5 col-12">
+                            <div class="row paginatorRow">
+                                <div class="col-lg-2 col-md-6 col-sm-12 pt-2 mb-3">                                
+                                    <span class="d-inline-flex">
+                                        Showing
+                                        <span class="font-weight-bold ml-1 mr-1"><?php echo $start; ?></span> -
+                                        <span class="font-weight-bold ml-1 mr-1"><?php echo $end; ?></span>
+                                        of
+                                        <span class="font-weight-bold ml-1"><?php echo $totalRecords; ?></span>
+                                    </span>
+                                </div>
+                                <div class="col-lg-10 col-md-6 col-sm-12 d-flex justify-content-end justify-content-center-xs">
+                                    <div>
+                                            <?php if ($totalPages > 1): ?>
+
+                                                <nav>
+                                                    <ul class="pagination">
+
+                                                        <!-- Previous -->
+                                                        <?php if ($page > 1): ?>
+                                                            <li class="page-item">
+                                                                <a class="page-link"
+                                                                href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>">
+                                                                Previous
+                                                                </a>
+                                                            </li>
+                                                        <?php endif; ?>
+
+                                                        <!-- Page Numbers -->
+                                                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                                            <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                                                                <a class="page-link"
+                                                                href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>">
+                                                                    <?php echo $i; ?>
+                                                                </a>
+                                                            </li>
+                                                        <?php endfor; ?>
+
+                                                        <!-- Next -->
+                                                        <?php if ($page < $totalPages): ?>
+                                                            <li class="page-item">
+                                                                <a class="page-link"
+                                                                href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>">
+                                                                Next
+                                                                </a>
+                                                            </li>
+                                                        <?php endif; ?>
+
+                                                    </ul>
+                                                </nav>
+
+                                            <?php endif; ?>
+                                            </div>
+         
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </div>
+                        </div>
+                    </div>
+                   
+                </section>
+            </div>
+           <!-- Agent Modal -->
+<div class="modal fade" id="agentModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Agent Details</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="editAgentForm" enctype="multipart/form-data">
+
+          <input type="hidden" id="editAgentId" name="id">
+
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img id="modalProfile" src="" class="img-fluid rounded mb-3" width="150">
+              <input type="file" name="profile" class="form-control mt-2">
+                <br>
+                <select id="status" name="status" class="form-control" disabled>
+                    <option value="">-Select-</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+
+            </div>
+
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="modalName" name="name" class="form-control" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="modalEmail" name="email" class="form-control" readonly>
+              </div>
+               <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" name="password" class="form-control" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="text" id="modalPhone" name="phone" class="form-control" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="modalGender" name="gender" class="form-control" disabled>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label>About</label>
+              <textarea id="modalAbout" name="about" class="form-control" rows="3" readonly></textarea>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="editBtn" class="btn btn-warning">Edit</button>
+        <button type="button" id="saveBtn" class="btn btn-success d-none">Save Changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('click', function(e) {
+
+    // VIEW BUTTON
+    if (e.target.classList.contains('view-agent-btn')) {
+
+        const agentId = e.target.dataset.id;
+
+        fetch('apps/model/get_agent.php?id=' + agentId)
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status === 'success') {
+
+                document.getElementById('editAgentId').value = data.data.id;
+                document.getElementById('modalName').value = data.data.name;
+                document.getElementById('modalEmail').value = data.data.email;
+                document.getElementById('password').value = data.data.password;
+                document.getElementById('modalPhone').value = data.data.phone;
+                document.getElementById('modalGender').value = data.data.gender;
+                document.getElementById('modalAbout').value = data.data.about;
+                document.getElementById('modalProfile').src = data.data.profile;
+                 document.getElementById('status').value = data.data.status;
+
+                $('#agentModal').modal('show');
+            }
+        });
+    }
+});
+
+// ENABLE EDIT MODE
+document.getElementById('editBtn').addEventListener('click', function() {
+
+    document.querySelectorAll('#editAgentForm input, #editAgentForm textarea')
+        .forEach(el => el.removeAttribute('readonly'));
+
+    document.getElementById('modalGender').removeAttribute('disabled');
+     document.getElementById('status').removeAttribute('disabled'); // ADD THIS
+    document.querySelector('input[name="profile"]').addEventListener('change', function(e) {
+    const reader = new FileReader();
+    
+    reader.onload = function() {
+        document.getElementById('modalProfile').src = reader.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+});
+
+    this.classList.add('d-none');
+    document.getElementById('saveBtn').classList.remove('d-none');
+});
+
+// SAVE CHANGES
+document.getElementById('saveBtn').addEventListener('click', function() {
+
+    const form = document.getElementById('editAgentForm');
+    const formData = new FormData(form);
+
+    fetch('apps/model/update_agent.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.status === 'success') {
+            alert('Agent updated successfully');
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Update failed');
+    });
+});
+</script>
+<script>
+let debounceTimer;
+
+document.getElementById('searchByUser').addEventListener('keyup', function () {
+
+    clearTimeout(debounceTimer);
+
+    let searchValue = this.value;
+
+    debounceTimer = setTimeout(function () {
+
+        fetchAgents(1, searchValue);
+
+    }, 400);
+
+});
+
+function fetchAgents(page = 1, search = '') {
+
+    let formData = new FormData();
+    formData.append('page', page);
+    formData.append('search', search);
+
+    fetch('apps/model/fetch_agents_search.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('agentResults').innerHTML = data;
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+          
+          
